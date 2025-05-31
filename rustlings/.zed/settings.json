@@ -1,6 +1,4 @@
 {
-  "show_completions_on_input": false,
-  "suggest_on_input": false,
   "edit_predictions": {
     "mode": "subtle"
   }
