@@ -1,14 +1,11 @@
 use log::debug;
 use serde::{Deserialize, Serialize};
 
-use std::{
-    fs::File,
-    io::{BufReader, Error, ErrorKind},
-    path::PathBuf,
-}; // path buffer, to construct paths
+use crate::utils::parse_json_file;
+use std::{io::Error, path::PathBuf}; // path buffer, to construct paths
 
 #[derive(Serialize, Deserialize, Debug)]
-struct ScheduleItem {
+pub struct ScheduleItem {
     start: i32,
     end: i32,
     title: String,
@@ -25,22 +22,12 @@ impl Clone for ScheduleItem {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-struct Schedule {
+pub struct Schedule {
     items: Vec<ScheduleItem>,
 }
 
-fn parse_json_file(path: &PathBuf) -> Result<Schedule, Error> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-
-    let schedule =
-        serde_json::from_reader(reader).map_err(|e| Error::new(ErrorKind::InvalidData, e))?;
-
-    Ok(schedule)
-}
-
 pub fn get_optimal_schedule(path: &PathBuf) -> Result<(), Error> {
-    let schedule = parse_json_file(path).unwrap();
+    let schedule = parse_json_file::<Schedule>(path).unwrap();
     debug!("Extracted schedule: {:?}", schedule);
     let mut optimal_schedule_items: Vec<ScheduleItem> = Vec::new();
     let mut schedule_items = schedule.items.clone();
