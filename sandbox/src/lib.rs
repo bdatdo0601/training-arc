@@ -1,5 +1,5 @@
-use clap::Subcommand;
-use log::debug;
+use clap::{value_parser, Subcommand};
+use log::{debug, info};
 use std::path::PathBuf; // path buffer, to construct paths
 
 mod commands;
@@ -29,6 +29,16 @@ pub enum Commands {
         #[arg(short, long)]
         json_file_path: PathBuf,
     },
+    DailyTemperature {
+        /// numbers containing the temperatures separated by commas
+        /// 33, 74, 75, 71, 69, 72, 76, 73
+        #[arg(short, long, required = true, value_delimiter = ',', value_parser = value_parser!(i32))]
+        temperatures: Vec<i32>,
+
+        /// algorithm mode: either "stack" or "reverse"
+        #[arg(short, long)]
+        mode: String,
+    },
 }
 
 impl ToString for Commands {
@@ -41,6 +51,12 @@ impl ToString for Commands {
                 format!(
                     "SufficientCoverageSet {{ json_file_path: {:?} }}",
                     json_file_path
+                )
+            }
+            Commands::DailyTemperature { temperatures, mode } => {
+                format!(
+                    "DailyTemperature {{ temperatures: {:?}, mode: {:?} }}",
+                    temperatures, mode
                 )
             }
         }
@@ -62,6 +78,18 @@ pub fn run_command(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
                 json_file_path.display()
             );
             sufficient_coverage_set::evaluate_sufficient_coverage(&json_file_path)?;
+            Ok(())
+        }
+        Commands::DailyTemperature { temperatures, mode } => {
+            // Implement the daily temperature algorithm here
+            info!(
+                "Finding daily temperature from {:?} using {:?} method",
+                temperatures, mode
+            );
+            let time_elapsed = std::time::Instant::now();
+            let result = daily_temperature::get_daily_temperature(&temperatures, &mode)?;
+            debug!("Time elapsed: {:?}", time_elapsed.elapsed());
+            info!("Result: {:?}", result);
             Ok(())
         }
     }
