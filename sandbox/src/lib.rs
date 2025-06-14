@@ -39,6 +39,21 @@ pub enum Commands {
         #[arg(short, long)]
         mode: String,
     },
+    /// Rotating a list by k rotations
+    RotatingList {
+        /// numbers containing the temperatures separated by commas
+        /// 33, 74, 75, 71, 69, 72, 76, 73
+        #[arg(short, long, required = true, value_delimiter = ',', value_parser = value_parser!(i32))]
+        numbers: Vec<i32>,
+
+        /// algorithm mode: either "stack" or "reverse"
+        #[arg(short, long, value_parser = value_parser!(i32))]
+        k: i32,
+
+        /// algorithm mode: either "Right" or "Left"
+        #[arg(short, long, default_value = "right")]
+        rotation_direction: String,
+    },
 }
 
 impl ToString for Commands {
@@ -57,6 +72,16 @@ impl ToString for Commands {
                 format!(
                     "DailyTemperature {{ temperatures: {:?}, mode: {:?} }}",
                     temperatures, mode
+                )
+            }
+            Commands::RotatingList {
+                numbers,
+                k,
+                rotation_direction,
+            } => {
+                format!(
+                    "RotatingList {{ numbers: {:?}, k: {:?}, rotation_direction: {:?} }}",
+                    numbers, k, rotation_direction
                 )
             }
         }
@@ -88,6 +113,19 @@ pub fn run_command(cmd: Commands) -> Result<(), Box<dyn std::error::Error>> {
             );
             let time_elapsed = std::time::Instant::now();
             let result = daily_temperature::get_daily_temperature(&temperatures, &mode)?;
+            debug!("Time elapsed: {:?}", time_elapsed.elapsed());
+            info!("Result: {:?}", result);
+            Ok(())
+        }
+        Commands::RotatingList {
+            numbers,
+            k,
+            rotation_direction,
+        } => {
+            // Implement the rotating list algorithm here
+            info!("Rotating list from {:?} by {:?} rotations", numbers, k);
+            let time_elapsed = std::time::Instant::now();
+            let result = rotating_list::rotating_list(numbers, k, &rotation_direction)?;
             debug!("Time elapsed: {:?}", time_elapsed.elapsed());
             info!("Result: {:?}", result);
             Ok(())
